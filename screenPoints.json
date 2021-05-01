@@ -1,0 +1,14 @@
+{
+    "card1textCoords": [1004, 1104],
+    "card2textCoords": [1366, 1164],
+    "card3textCoords": [1647, 1172],
+    "card4textCoords": [1898, 1170],
+    "card1position": [2085, 1178],
+    "card2position": [2362, 1182],
+    "card3position": [2608, 1175],
+    "card4position": [2876, 1166],
+    "aboveRightTower": [3113, 1170],
+    "aboveLeftTower": [3058, 1152],
+    "leftPushed": [1724, 1201],
+    "rightPushed": [662, 1160]
+}

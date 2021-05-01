@@ -1,3 +1,6 @@
+# A python program that attempts to play clash royale
+# Ryan Zmuda 2021
+
 import pyautogui
 import win32gui
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
@@ -106,7 +109,7 @@ def parseStaticValues(
 
     # TODO TEST FILTERING ONE TIME FOR EFFICIENCY
 
-    with Image.open("images/playfield.png") as im:
+    with Image.open("images/playfield.png") as im:  # TODO THIS NEEDS TO GO
 
         # update current elixer store value based off playfield image
         elixerStoreImg = im.crop((170, 1050, 200, 1090))
@@ -287,6 +290,7 @@ if __name__ == "__main__":
 # - refactor code, you copy paste like a bitch and this needs to be optimized
 # - TODO next step: isolate red pixels on screen to detect enemies
 # TODO how costly is transforming to int?
+# TODO GETS INNACURATE CARD PRICE AND KEEPS IT
 
 # WHERE I LEFT OFF
 # wrote a very basic attack pattern of spamming left lane
