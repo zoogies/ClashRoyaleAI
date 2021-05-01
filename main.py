@@ -227,6 +227,24 @@ def placeCard(location, cardIndex):
         usedFTHC = True
 
 
+# BASIC STATEGIES
+
+# pick the cheapest presented card at all times and place it
+def placeCheapestCard():
+    possibleCards = [
+        int(firstCardCost),
+        int(secondCardCost),
+        int(thirdCardCost),
+        int(fourthCardCost),
+    ]
+    # get index of smallest item in list
+    cardNumber = (
+        possibleCards.index(min(possibleCards)) + 1
+    )  # add one because lists start at 0
+
+    placeCard("leftAboveTower", cardNumber)
+
+
 if __name__ == "__main__":
     while True:
         # get a screenshot of the playfield
@@ -250,9 +268,7 @@ if __name__ == "__main__":
         )
         time.sleep(1)
 
-        # rudementary test ai TODO how costly is transforming to int?
-        if int(elixerStoreValue) >= int(firstCardCost):
-            placeCard("leftAboveTower", 1)
+        placeCheapestCard()
 
         # emergency abort
         if keyboard.is_pressed("q"):
@@ -270,3 +286,10 @@ if __name__ == "__main__":
 # - maybe put filters on image one time and crop from that to make easier? wait maybe not due to differing thresholds
 # - refactor code, you copy paste like a bitch and this needs to be optimized
 # - TODO next step: isolate red pixels on screen to detect enemies
+# TODO how costly is transforming to int?
+
+# WHERE I LEFT OFF
+# wrote a very basic attack pattern of spamming left lane
+# WHAT YOU SHOULD DO:
+# write more attack patterns for fun
+# start detecting enemies and countering (detect via clusters or something maybe) red filter over playfield
