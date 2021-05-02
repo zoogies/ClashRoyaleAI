@@ -8,6 +8,7 @@
 import json
 import pyautogui
 import os
+import win32gui, win32con, win32com.client
 
 name = ""
 
@@ -20,6 +21,27 @@ if input("Would you like to enable debug output? y/n: ") == "y":
     debug = True
 else:
     debug = False
+
+
+"""def screenshot(window_title=None):
+    if window_title:
+        hwnd = win32gui.FindWindow(None, window_title)
+        if hwnd:
+            shell = win32com.client.Dispatch("WScript.Shell")
+            shell.SendKeys("%")
+
+            win32gui.SetForegroundWindow(hwnd)
+            x, y, x1, y1 = win32gui.GetClientRect(hwnd)
+            x, y = win32gui.ClientToScreen(hwnd, (x, y))
+            x1, y1 = win32gui.ClientToScreen(hwnd, (x1 - x, y1 - y))
+            im = pyautogui.screenshot(region=(x, y, x1, y1))
+            return im
+        else:
+            print("Window not found!")
+    else:
+        im = pyautogui.screenshot()
+        return im
+"""
 
 
 def printHeaderClear():
@@ -37,9 +59,62 @@ def queryForPosition(name):
     return position
 
 
-# screen origin
-screenOrigin = queryForPosition("very top let pixel of your clash royale screen")
+"""
+# defualts
+confirmedRes = False
+while not confirmedRes:
+    # printHeaderClear()
+    print("Now setting up playfield size and position")
+
+    # screen origin
+    screenOrigin = queryForPosition("very top left pixel of your clash royale screen")
+    screenBotRight = queryForPosition(
+        "very bottom right pixel of you clash royale screen"
+    )
+    print("screen origin", screenOrigin)
+    print("screen bot right", screenBotRight)
+
+    # get size of our current bluestacks window
+    im = screenshot("BlueStacks")
+    bluestacksSize = im.size
+    print("bluestacks size", bluestacksSize)
+    screenSize = [
+        screenBotRight[0] - screenOrigin[0],
+        screenBotRight[1] - screenOrigin[1],
+    ]
+    print("screen size", screenSize)
+    # calculate our crop amounts from our given playfield size and window size
+    cropTL = [0, bluestacksSize[1] - screenSize[1]]
+    cropBR = [screenSize[0], bluestacksSize[1]]
+    print("crop tl", cropTL)
+    print("crop br", cropBR)
+    im.crop(
+        (
+            cropTL[0],
+            cropTL[1],
+            cropBR[0],
+            cropBR[1],
+        )
+    )
+    print(
+        cropTL[0],
+        cropTL[1],
+        cropBR[0],
+        cropBR[1],
+    )
+    im.show()
+
+    # printHeaderClear()
+    if input("Does this look correct? y/n ") == "y":
+        confirmedRes = True TODO finish this maybe idk why it dont work
+"""
+
+screenOrigin = queryForPosition("very top left pixel of your clash royale screen")
 screenBotRight = queryForPosition("very bottom right pixel of you clash royale screen")
+
+
+# ask if the screen res looks right
+
 
 # d8888b. d88888b  .o88b. db   dD    .o88b.  .d8b.  d8888b. d8888b. .d8888.
 # 88  `8D 88'     d8P  Y8 88 ,8P'   d8P  Y8 d8' `8b 88  `8D 88  `8D 88'  YP
@@ -178,3 +253,5 @@ print("You have successfully configured the screen points!")
 #     "leftPushed": [2628, 416],
 #     "rightPushed": [2948, 424]
 # }
+
+# TODO maybe screenshot show user and ask if it looks good?
