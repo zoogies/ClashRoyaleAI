@@ -74,13 +74,6 @@ with open("screenPoints.json") as json_file:
 # figure out our width and height of screen
 screenSize = (screenBotRight[0] - screenOrigin[0], screenBotRight[1] - screenOrigin[1])
 
-# tell program we dont know any of our deck cards TODO this shit needs to be done better or removed
-# TODO yeah lmao i feel you past self, this is pretty dogshit
-usedFC = True
-usedSC = True
-usedTC = True
-usedFTHC = True
-
 # set tesseract path
 with open("tesseractPath.txt", "r") as tessPath:
     tess.pytesseract.tesseract_cmd = tessPath.read()
@@ -160,10 +153,8 @@ def parseStaticValues(
             (elixerStoreTextPos[1] + elixerStoreScanRadius),
         )
     )
-    # elixerStoreImg.show()
     # update current elixer store value based off playfield image
     elixerStoreImg = filterImage(elixerStoreImg)
-    # elixerStoreImg.show()
 
     # defualt to last known value if we dont know our current
     tmp = tessParse(elixerStoreImg)
@@ -171,10 +162,8 @@ def parseStaticValues(
         elixerStoreValue = tmp
     print("elixer store value:", elixerStoreValue)
 
-    # only check for card values if we know we have a different card
-
     if usedFirstCardSinceLastCheck:
-        # update first card elixer value
+        # update first card elixer value# TODO hard code this dont run computations every frame
         firstCardPriceImg = im.crop(
             (
                 (card1textCoords[0] - cardScanRadius),
@@ -184,15 +173,15 @@ def parseStaticValues(
             )
         )
         firstCardPriceImg = filterImage(firstCardPriceImg)
-        # firstCardPriceImg.show()
+
+        # only update value if it isnt null
         tmp = tessParse(firstCardPriceImg)
         if tmp != "":
             firstCardCost = tmp
         print("first card price:", firstCardCost)
-        # usedFirstCardSinceLastCheck = False
 
     if usedSecondCardSinceLastCheck:
-        # update second card elixer value
+        # update second card elixer value# TODO hard code this dont run computations every frame
         secondCardPriceImg = im.crop(
             (
                 (card2textCoords[0] - cardScanRadius),
@@ -202,15 +191,16 @@ def parseStaticValues(
             )
         )
         secondCardPriceImg = filterImage(secondCardPriceImg)
-        # secondCardPriceImg.show()
+
+        # only update value if it isnt null
         tmp = tessParse(secondCardPriceImg)
         if tmp != "":
             secondCardCost = tmp
+        # TODO add if verbose here or clear screen between do this for all of them
         print("second card price:", secondCardCost)
-        # usedSecondCardSinceLastCheck = False
 
     if usedThirdCardSinceLastCheck:
-        # update third card elixer value
+        # update third card elixer value# TODO hard code this dont run computations every frame
         thirdCardPriceImg = im.crop(
             (
                 (card3textCoords[0] - cardScanRadius),
@@ -220,15 +210,15 @@ def parseStaticValues(
             )
         )
         thirdCardPriceImg = filterImage(thirdCardPriceImg)
-        # thirdCardPriceImg.show()
+
+        # only update value if it isnt null
         tmp = tessParse(thirdCardPriceImg)
         if tmp != "":
             thirdCardCost = tmp
         print("third card price:", thirdCardCost)
-        # usedThirdCardSinceLastCheck = False
 
     if usedFourthCardSinceLastCheck:
-        # update fourth card elixer value
+        # update fourth card elixer value# TODO hard code this dont run computations every frame
         fourthCardPriceImg = im.crop(
             (
                 (card4textCoords[0] - cardScanRadius),
@@ -238,12 +228,12 @@ def parseStaticValues(
             )
         )
         fourthCardPriceImg = filterImage(fourthCardPriceImg)
-        # fourthCardPriceImg.show()
+
+        # only update value if it isnt null
         tmp = tessParse(fourthCardPriceImg)
         if tmp != "":
             fourthCardCost = tmp
         print("fourth card price:", fourthCardCost)
-        # usedFourthCardSinceLastCheck = False
 
     print("elapsed static parse time:", datetime.now() - parseValuesElapsedTime)
 
@@ -286,15 +276,6 @@ def detectEnemies(playfieldImage, query):
             "images/enemyDetect.png", cv2.absdiff(refIm, im)
         )  # diff between two images
 
-
-# card location possibilities:
-# - leftAboveTower
-# - rightAboveTower
-# - leftPushedTower
-# - rightPushedTower
-# - defendLeftCastle
-# - defendRightCastle
-# -
 
 # starting this index from 1 because its possibly faster (yes i know, barely if at all)
 def placeCard(location, cardIndex):
@@ -413,22 +394,9 @@ if __name__ == "__main__":
             print("-> EMERGENCY EXIT")
             exit()
 
-
-# pyautogui.click(gameOrigin[0], gameOrigin[1])
-# keyboard.press("1")
-
-# mental map:
-# - find single digit numbers for rank of enemy units
-# - maybe put filters on image one time and crop from that to make easier? wait maybe not due to differing thresholds
-# - TODO next step: isolate red pixels on screen to detect enemies
-# TODO GETS INNACURATE CARD PRICE AND KEEPS IT
-
-# WHERE I LEFT OFF
-# wrote a very basic attack pattern of spamming left lane
 # WHAT YOU SHOULD DO:
 # write more attack patterns for fun
-# start detecting enemies and countering (detect via clusters or something maybe) red filter over playfield
-# TODO width might be fucky for text prob dont hardcode this
+# start countering enemies (detect via clusters or something maybe)
 # TODO AI check for red when holding card to know if tower is taken,
 # TODO make it spam emotes would be a funny moment in the video
 # https://stackoverflow.com/questions/60018903/how-to-replace-all-pixels-of-a-certain-rgb-value-with-another-rgb-value-in-openc todo look at this instead of PIL for cleaning elixer text
