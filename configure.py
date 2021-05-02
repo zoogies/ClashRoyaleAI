@@ -235,23 +235,9 @@ with open("screenPoints.json", "w") as outfile:
 printHeaderClear()
 print("You have successfully configured the screen points!")
 
+# add getting reference pic here
 
 # points saved for testing purposes:
-# {
-#     "screenOrigin": [2471, 42],
-#     "elixerTextCoords": [2658, 1121],
-#     "card1textCoords": [2666, 1093],
-#     "card2textCoords": [2784, 1092],
-#     "card3textCoords": [2903, 1092],
-#     "card4textCoords": [3021, 1094],
-#     "card1position": [2671, 1035],
-#     "card2position": [2793, 1027],
-#     "card3position": [2915, 1035],
-#     "card4position": [3018, 1039],
-#     "aboveRightTower": [2944, 620],
-#     "aboveLeftTower": [2617, 628],
-#     "leftPushed": [2628, 416],
-#     "rightPushed": [2948, 424]
-# }
+# {"screenOrigin": [2678, 44], "screenBotRight": [3439, 1392], "elixerTextCoords": [2900, 1347], "card1textCoords": [2912, 1307], "card2textCoords": [3054, 1307], "card3textCoords": [3197, 1306], "card4textCoords": [3339, 1306], "card1position": [2910, 1208], "card2position": [3053, 1198], "card3position": [3180, 1200], "card4position": [3317, 1204], "aboveRightTower": [3254, 795], "aboveLeftTower": [2851, 774], "leftPushed": [2851, 515], "rightPushed": [3253, 517]}
 
 # TODO maybe screenshot show user and ask if it looks good?
