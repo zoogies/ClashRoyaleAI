@@ -37,6 +37,10 @@ def queryForPosition(name):
     return position
 
 
+# screen origin
+screenOrigin = queryForPosition("very top let pixel of your clash royale screen")
+screenBotRight = queryForPosition("very bottom right pixel of you clash royale screen")
+
 # d8888b. d88888b  .o88b. db   dD    .o88b.  .d8b.  d8888b. d8888b. .d8888.
 # 88  `8D 88'     d8P  Y8 88 ,8P'   d8P  Y8 d8' `8b 88  `8D 88  `8D 88'  YP
 # 88   88 88ooooo 8P      88,8P     8P      88ooo88 88oobY' 88   88 `8bo.
@@ -122,7 +126,11 @@ rightPushedTower = queryForPosition(
 
 
 jsonContents = {
+    # screen origin point
+    "screenOrigin": (screenOrigin[0], screenOrigin[1]),
+    "screenBotRight": (screenBotRight[0], screenBotRight[1]),
     # center of card elixer price text
+    "elixerTextCoords": (elixerTextCenter[0], elixerTextCenter[1]),
     "card1textCoords": (card1TextCenter[0], card1TextCenter[1]),
     "card2textCoords": (card2TextCenter[0], card2TextCenter[1]),
     "card3textCoords": (card3TextCenter[0], card3TextCenter[1]),
@@ -151,3 +159,22 @@ with open("screenPoints.json", "w") as outfile:
 # end card
 printHeaderClear()
 print("You have successfully configured the screen points!")
+
+
+# points saved for testing purposes:
+# {
+#     "screenOrigin": [2471, 42],
+#     "elixerTextCoords": [2658, 1121],
+#     "card1textCoords": [2666, 1093],
+#     "card2textCoords": [2784, 1092],
+#     "card3textCoords": [2903, 1092],
+#     "card4textCoords": [3021, 1094],
+#     "card1position": [2671, 1035],
+#     "card2position": [2793, 1027],
+#     "card3position": [2915, 1035],
+#     "card4position": [3018, 1039],
+#     "aboveRightTower": [2944, 620],
+#     "aboveLeftTower": [2617, 628],
+#     "leftPushed": [2628, 416],
+#     "rightPushed": [2948, 424]
+# }

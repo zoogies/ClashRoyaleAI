@@ -1,3 +1,4 @@
+# TODO need better method of getting crop bounding of bluestacks
 import time
 
 import pyautogui
