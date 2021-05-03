@@ -14,6 +14,9 @@ import random
 import numpy as np
 import cv2
 
+# for dev testing purposes
+verbose = True
+
 # defualts
 elixerStoreValue = 0
 
@@ -71,6 +74,39 @@ with open("screenPoints.json") as json_file:
     thirdCardCoords = tuple(data["card3position"])
     fourthCardCoords = tuple(data["card4position"])
 
+# set our constants for our crop values so we dont have to compute them every frame
+elixerCrop = (
+    (elixerStoreTextPos[0] - elixerStoreScanRadius),
+    (elixerStoreTextPos[1] - elixerStoreScanRadius),
+    (elixerStoreTextPos[0] + elixerStoreScanRadius),
+    (elixerStoreTextPos[1] + elixerStoreScanRadius),
+)
+
+firstCardCrop = (
+    (card1textCoords[0] - cardScanRadius),
+    (card1textCoords[1] - cardScanRadius),
+    (card1textCoords[0] + cardScanRadius),
+    (card1textCoords[1] + cardScanRadius),
+)
+secondCardCrop = (
+    (card2textCoords[0] - cardScanRadius),
+    (card2textCoords[1] - cardScanRadius),
+    (card2textCoords[0] + cardScanRadius),
+    (card2textCoords[1] + cardScanRadius),
+)
+thirdCardCrop = (
+    (card3textCoords[0] - cardScanRadius),
+    (card3textCoords[1] - cardScanRadius),
+    (card3textCoords[0] + cardScanRadius),
+    (card3textCoords[1] + cardScanRadius),
+)
+fourthCardCrop = (
+    (card4textCoords[0] - cardScanRadius),
+    (card4textCoords[1] - cardScanRadius),
+    (card4textCoords[0] + cardScanRadius),
+    (card4textCoords[1] + cardScanRadius),
+)
+
 # figure out our width and height of screen
 screenSize = (screenBotRight[0] - screenOrigin[0], screenBotRight[1] - screenOrigin[1])
 
@@ -121,7 +157,7 @@ def tessParse(im):
     # 4 is commonly mistaken for Q in the clash royale font, correct for this
     if "q" in detectedText:
         detectedText = "4"
-    # print("detected text:", detectedText)
+
     detectedText = re.sub(
         "[^0-9]", "", detectedText
     )  # this is regex! wow im so god damn smart >:) totally didnt copy it from somewhere
@@ -132,10 +168,6 @@ def tessParse(im):
 
 def parseStaticValues(
     elixerStoreValue,
-    usedFirstCardSinceLastCheck,
-    usedSecondCardSinceLastCheck,
-    usedThirdCardSinceLastCheck,
-    usedFourthCardSinceLastCheck,
     firstCardCost,
     secondCardCost,
     thirdCardCost,
@@ -145,14 +177,7 @@ def parseStaticValues(
     parseValuesElapsedTime = datetime.now()
 
     # TODO hard code this dont run computations every frame
-    elixerStoreImg = im.crop(
-        (
-            (elixerStoreTextPos[0] - elixerStoreScanRadius),
-            (elixerStoreTextPos[1] - elixerStoreScanRadius),
-            (elixerStoreTextPos[0] + elixerStoreScanRadius),
-            (elixerStoreTextPos[1] + elixerStoreScanRadius),
-        )
-    )
+    elixerStoreImg = im.crop((elixerCrop))
     # update current elixer store value based off playfield image
     elixerStoreImg = filterImage(elixerStoreImg)
 
@@ -160,82 +185,64 @@ def parseStaticValues(
     tmp = tessParse(elixerStoreImg)
     if tmp != "":
         elixerStoreValue = tmp
-    print("elixer store value:", elixerStoreValue)
+    if verbose:
+        print("elixer store value:", elixerStoreValue)
 
-    if usedFirstCardSinceLastCheck:
+    if True:  # TODO see 216
         # update first card elixer value# TODO hard code this dont run computations every frame
-        firstCardPriceImg = im.crop(
-            (
-                (card1textCoords[0] - cardScanRadius),
-                (card1textCoords[1] - cardScanRadius),
-                (card1textCoords[0] + cardScanRadius),
-                (card1textCoords[1] + cardScanRadius),
-            )
-        )
+        firstCardPriceImg = im.crop((firstCardCrop))
         firstCardPriceImg = filterImage(firstCardPriceImg)
 
         # only update value if it isnt null
         tmp = tessParse(firstCardPriceImg)
-        if tmp != "":
+        if tmp != "" and tmp != "0":
             firstCardCost = tmp
-        print("first card price:", firstCardCost)
+        if verbose:
+            print("first card price:", firstCardCost)
 
-    if usedSecondCardSinceLastCheck:
+    if True:  # TODO see 216
         # update second card elixer value# TODO hard code this dont run computations every frame
-        secondCardPriceImg = im.crop(
-            (
-                (card2textCoords[0] - cardScanRadius),
-                (card2textCoords[1] - cardScanRadius),
-                (card2textCoords[0] + cardScanRadius),
-                (card2textCoords[1] + cardScanRadius),
-            )
-        )
+        secondCardPriceImg = im.crop((secondCardCrop))
         secondCardPriceImg = filterImage(secondCardPriceImg)
 
         # only update value if it isnt null
         tmp = tessParse(secondCardPriceImg)
-        if tmp != "":
+        if tmp != "" and tmp != "0":
             secondCardCost = tmp
         # TODO add if verbose here or clear screen between do this for all of them
-        print("second card price:", secondCardCost)
+        if verbose:
+            print("second card price:", secondCardCost)
 
-    if usedThirdCardSinceLastCheck:
+    if True:  # TODO see 216
         # update third card elixer value# TODO hard code this dont run computations every frame
-        thirdCardPriceImg = im.crop(
-            (
-                (card3textCoords[0] - cardScanRadius),
-                (card3textCoords[1] - cardScanRadius),
-                (card3textCoords[0] + cardScanRadius),
-                (card3textCoords[1] + cardScanRadius),
-            )
-        )
+        thirdCardPriceImg = im.crop((thirdCardCrop))
         thirdCardPriceImg = filterImage(thirdCardPriceImg)
 
         # only update value if it isnt null
         tmp = tessParse(thirdCardPriceImg)
-        if tmp != "":
+        if tmp != "" and tmp != "0":
             thirdCardCost = tmp
-        print("third card price:", thirdCardCost)
+        if verbose:
+            print("third card price:", thirdCardCost)
 
-    if usedFourthCardSinceLastCheck:
+    if (
+        True
+    ):  # TODO prob remove this, having second thoughts about backing out of detecting only when cards are used
         # update fourth card elixer value# TODO hard code this dont run computations every frame
-        fourthCardPriceImg = im.crop(
-            (
-                (card4textCoords[0] - cardScanRadius),
-                (card4textCoords[1] - cardScanRadius),
-                (card4textCoords[0] + cardScanRadius),
-                (card4textCoords[1] + cardScanRadius),
-            )
-        )
+        fourthCardPriceImg = im.crop((fourthCardCrop))
         fourthCardPriceImg = filterImage(fourthCardPriceImg)
 
         # only update value if it isnt null
         tmp = tessParse(fourthCardPriceImg)
-        if tmp != "":
+        if tmp != "" and tmp != "0":
             fourthCardCost = tmp
-        print("fourth card price:", fourthCardCost)
-
-    print("elapsed static parse time:", datetime.now() - parseValuesElapsedTime)
+        if verbose:
+            print("fourth card price:", fourthCardCost)
+    if verbose:
+        print(
+            "elapsed static parse time:",
+            datetime.now() - parseValuesElapsedTime,
+        )
 
 
 def detectEnemies(playfieldImage, query):
@@ -252,12 +259,8 @@ def detectEnemies(playfieldImage, query):
         )
     )
 
-    playfieldImage.save(
-        "images/enemyDetect.png"
-    )  # TODO convert to workable for PIL instead of saving
-
     # Load image
-    im = cv2.imread("images/enemyDetect.png")
+    im = cv2.cvtColor(np.array(playfieldImage), cv2.COLOR_RGB2BGR)
 
     # Define some colours for readability - these are in OpenCV **BGR** order - reverse them for PIL
     red = [236, 52, 52]
@@ -307,16 +310,6 @@ def placeCard(location, cardIndex):
     elif location == "defendRightCastle":
         # TODO
         return
-
-    # let the program know we need to scan for new value in spot of whichever card we just used
-    if cardIndex == 1:
-        usedFC = True
-    elif cardIndex == 2:
-        usedSC = True
-    elif cardIndex == 3:
-        usedTC = True
-    elif cardIndex == 4:
-        usedFTHC = True
 
 
 # BASIC STATEGIES
@@ -375,10 +368,6 @@ if __name__ == "__main__":
         # parse playfield for elixer store and our four card prices
         parseStaticValues(
             elixerStoreValue,
-            usedFC,
-            usedSC,
-            usedTC,
-            usedFTHC,
             firstCardCost,
             secondCardCost,
             thirdCardCost,
