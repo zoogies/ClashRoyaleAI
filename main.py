@@ -277,7 +277,7 @@ def detectEnemies(playfieldImage, query):
     else:
         cv2.imwrite(
             "images/enemyDetect.png", cv2.absdiff(refIm, im)
-        )  # diff between two images
+        )  # diff between two images TODO remove when not visualizing
 
 
 # starting this index from 1 because its possibly faster (yes i know, barely if at all)
@@ -363,9 +363,9 @@ if __name__ == "__main__":
                 cropBR[1],
             )
         )
-        # im.save("images/playfield.png")  # TODO REMOVE the save for efficiency (this is prob just for visualization)
 
         # parse playfield for elixer store and our four card prices
+
         parseStaticValues(
             elixerStoreValue,
             firstCardCost,
