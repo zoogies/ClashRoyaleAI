@@ -74,6 +74,10 @@ with open("screenPoints.json") as json_file:
     thirdCardCoords = tuple(data["card3position"])
     fourthCardCoords = tuple(data["card4position"])
 
+    # emote coords
+    emotePosition = tuple(data["emoteCoords"])
+    emoteMenuPosition = tuple(data["emoteMenuCoords"])
+
 # set our constants for our crop values so we dont have to compute them every frame
 elixerCrop = (
     (elixerStoreTextPos[0] - elixerStoreScanRadius),
@@ -280,6 +284,11 @@ def detectEnemies(playfieldImage, query):
         )  # diff between two images TODO remove when not visualizing
 
 
+def emote():
+    pyautogui.click(emoteMenuPosition[0], emoteMenuPosition[1])
+    pyautogui.click(emotePosition[0], emotePosition[1])
+
+
 # starting this index from 1 because its possibly faster (yes i know, barely if at all)
 def placeCard(location, cardIndex):
 
@@ -374,7 +383,8 @@ if __name__ == "__main__":
             fourthCardCost,
         )
 
-        detectEnemies(im, "i might be retarded possibly")
+        # detectEnemies(im, "i might be retarded possibly")
+        emote()
 
         # time.sleep(1)
 
@@ -390,3 +400,4 @@ if __name__ == "__main__":
 # TODO make it spam emotes would be a funny moment in the video
 # https://stackoverflow.com/questions/60018903/how-to-replace-all-pixels-of-a-certain-rgb-value-with-another-rgb-value-in-openc todo look at this instead of PIL for cleaning elixer text
 # TODO visualization mode for when you want to show off the AI working and another mode to toggle off the visuals for preformance (basically enables/disables image saving)
+# TODO naming convention if you can be fucked to fix it

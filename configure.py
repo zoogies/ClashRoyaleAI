@@ -9,8 +9,10 @@ import json
 import pyautogui
 import os
 import win32gui, win32con, win32com.client
+import pyttsx3
 
 name = ""
+engine = pyttsx3.init()
 
 os.system("cls" if os.name == "nt" else "clear")
 print("This file will help you setup your screen bounds and coordinate values!")
@@ -22,6 +24,10 @@ if input("Would you like to enable debug output? y/n: ") == "y":
 else:
     debug = False
 
+if input("Would you like to enable tts? y/n :") == "y":
+    tts = True
+else:
+    tts = False
 
 """def screenshot(window_title=None):
     if window_title:
@@ -54,6 +60,9 @@ def printHeaderClear():
 def queryForPosition(name):
     printHeaderClear()
     print("Please hover your mouse over the ", name, ", then press enter")
+    if tts:
+        engine.say(name)
+        engine.runAndWait()
     input("Waiting for you to press enter...")
     position = pyautogui.position()
     return position
@@ -192,6 +201,17 @@ rightPushedTower = queryForPosition(
 # TODO add more attack points
 
 
+# d88888b .88b  d88.  .d88b.  d888888b d88888b .d8888.
+# 88'     88'YbdP`88 .8P  Y8. `~~88~~' 88'     88'  YP
+# 88ooooo 88  88  88 88    88    88    88ooooo `8bo.
+# 88~~~~~ 88  88  88 88    88    88    88~~~~~   `Y8b.
+# 88.     88  88  88 `8b  d8'    88    88.     db   8D
+# Y88888P YP  YP  YP  `Y88P'     YP    Y88888P `8888Y'
+
+emoteMenu = queryForPosition("button to open the emote menu")
+favoriteEmote = queryForPosition("emote you want the ai to use")
+
+
 #    d88b .d8888.  .d88b.  d8b   db   d8888b.  .d8b.  d8888b. .d8888. d88888b
 #    `8P' 88'  YP .8P  Y8. 888o  88   88  `8D d8' `8b 88  `8D 88'  YP 88'
 #     88  `8bo.   88    88 88V8o 88   88oodD' 88ooo88 88oobY' `8bo.   88ooooo
@@ -220,6 +240,9 @@ jsonContents = {
     "aboveLeftTower": (aboveLeftTower[0], aboveLeftTower[1]),
     "leftPushed": (leftPushedTower[0], leftPushedTower[1]),
     "rightPushed": (rightPushedTower[0], rightPushedTower[1]),
+    # emotes
+    "emoteMenuCoords": (emoteMenu[0], emoteMenu[1]),
+    "emoteCoords": (favoriteEmote[0], favoriteEmote[1]),
 }
 
 # if debug print the object and then the dumped json
@@ -241,3 +264,4 @@ print("You have successfully configured the screen points!")
 # {"screenOrigin": [2678, 44], "screenBotRight": [3439, 1392], "elixerTextCoords": [2900, 1347], "card1textCoords": [2912, 1307], "card2textCoords": [3054, 1307], "card3textCoords": [3197, 1306], "card4textCoords": [3339, 1306], "card1position": [2910, 1208], "card2position": [3053, 1198], "card3position": [3180, 1200], "card4position": [3317, 1204], "aboveRightTower": [3254, 795], "aboveLeftTower": [2851, 774], "leftPushed": [2851, 515], "rightPushed": [3253, 517]}
 
 # TODO maybe screenshot show user and ask if it looks good?
+# TODO maybe show more emotes?
