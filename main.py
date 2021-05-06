@@ -114,6 +114,10 @@ fourthCardCrop = (
 # figure out our width and height of screen
 screenSize = (screenBotRight[0] - screenOrigin[0], screenBotRight[1] - screenOrigin[1])
 
+# scaling factor of our screen crop
+topBoundsPercent = 0.11  # TODO expose this in the json to configure
+botBoundsPercent = 0.2  # to transform these points back onto our normal playfield we just need to add these bounds back as an offset
+
 # set tesseract path
 with open("tesseractPath.txt", "r") as tessPath:
     tess.pytesseract.tesseract_cmd = tessPath.read()
@@ -251,9 +255,7 @@ def parseStaticValues(
 
 def detectEnemies(playfieldImage, query):
 
-    topBoundsPercent = 0.11  # TODO expose this in the json to configure
-    botBoundsPercent = 0.2  # to transform these points back onto our normal playfield we just need to add these bounds back as an offset
-
+    # TODO hard code this fuck i cant mentally visualize this but do it later and ref the variables in reverse of this operation
     playfieldImage = playfieldImage.crop(
         (
             0,
@@ -284,12 +286,37 @@ def detectEnemies(playfieldImage, query):
         )  # diff between two images TODO remove when not visualizing
 
 
+# TODO pair this down to only parsing move the cluster alg to another function or merge with detect
+def parseEnemies(topBoundsPercent, botBoundsPercent):
+    startTime = datetime.now()
+
+    playfieldImage = cv2.imread("images/enemyDetect.png")
+    variableName = np.argwhere(playfieldImage == 255)  # get all white pixels
+    if int(len(variableName) / 2) != 0:
+        middlePixel = variableName[
+            int(
+                len(variableName) / 2
+            )  # TODO replace this with the lowest white pixel on the screen
+        ].tolist()  # get the middle most white pixel (TODO is this actually gonna work lmao?)
+
+        middlePixel = (
+            middlePixel[0]
+            + ((screenSize[0] * topBoundsPercent) + (screenSize[1] * botBoundsPercent))
+            + screenOrigin[0],
+            middlePixel[1] + screenOrigin[1],
+        )
+        print("moving to:", middlePixel)
+        pyautogui.moveTo(middlePixel)
+    if verbose:
+        print("elapsed cluster:", datetime.now() - startTime)
+
+
 def emote():
     pyautogui.click(emoteMenuPosition[0], emoteMenuPosition[1])
     pyautogui.click(emotePosition[0], emotePosition[1])
 
 
-# starting this index from 1 because its possibly faster (yes i know, barely if at all)
+# starting this index from 1 because its possibly faster (yes i know, barely if at all) {clarification: because it removes an addition operation}
 def placeCard(location, cardIndex):
 
     # click on the card we want to use
@@ -383,8 +410,9 @@ if __name__ == "__main__":
             fourthCardCost,
         )
 
-        # detectEnemies(im, "i might be retarded possibly")
-        emote()
+        detectEnemies(im, "i might be retarded possibly")
+        # emote()
+        parseEnemies(topBoundsPercent, botBoundsPercent)
 
         # time.sleep(1)
 
@@ -401,3 +429,4 @@ if __name__ == "__main__":
 # https://stackoverflow.com/questions/60018903/how-to-replace-all-pixels-of-a-certain-rgb-value-with-another-rgb-value-in-openc todo look at this instead of PIL for cleaning elixer text
 # TODO visualization mode for when you want to show off the AI working and another mode to toggle off the visuals for preformance (basically enables/disables image saving)
 # TODO naming convention if you can be fucked to fix it
+# TODO touch up elixer and card detection it needs it, badly
