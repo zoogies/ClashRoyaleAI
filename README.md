@@ -1,5 +1,7 @@
 # ClashRoyaleAI
- A program created to play clash royale WIP
+[![wakatime](https://wakatime.com/badge/github/Yoyolick/ClashRoyaleAI.svg)](https://wakatime.com/badge/github/Yoyolick/ClashRoyaleAI)
+
+A program created to play clash royale WIP
 
 ## Dependancies
 This program is intended to be run on top of the [Blue Stacks](https://www.bluestacks.com/) emulator running clash royale. 
