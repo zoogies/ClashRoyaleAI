@@ -416,3 +416,4 @@ if __name__ == "__main__":
 # TODO naming convention if you can be fucked to fix it
 # TODO its possible emotes will show up in the zones that are being monitored, look into that
 # TODO organize constants and first declares
+# TODO python asynch announce its decisions
