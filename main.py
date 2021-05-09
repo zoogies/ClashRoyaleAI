@@ -303,7 +303,24 @@ def parseEnemies():
         print("right att", len(rightAtt))
         print("right def", len(rightDef))
 
-    # TODO logic for deciding our course of action
+    leftAtt = len(leftAtt)
+    leftDef = len(leftDef)
+    rightAtt = len(rightAtt)
+    rightDef = len(rightDef)
+
+    # TODO this logic could always be done better
+    if int(elixerStoreValue) > 4:
+        cardToPlace = random.randint(1, 4)
+        if not leftDef + leftAtt + rightAtt + rightDef <= 0:  # if there are enemies
+            if leftDef + leftAtt >= rightAtt + leftDef:  # if more enemies left
+                placeCard(cardToPlace, "leftDef")  # place units left
+            else:  # else more units are right
+                placeCard(cardToPlace, "rightDef")  # place units right
+        else:  # else there are enemies already
+            if targetedLane == 0:  # if the AI is targeting lane 0
+                placeCard(cardToPlace, "leftDef")  # place a unit in lane 0 home
+            else:  # else AI is targeting lane 1
+                placeCard(cardToPlace, "rightDef")  # place a unit in lane 1 home
 
     if verbose:
         print("elapsed enemy parse:", datetime.now() - startTime)
@@ -315,7 +332,7 @@ def emote():
 
 
 # starting this index from 1 because its possibly faster (yes i know, barely if at all) {clarification: because it removes an addition operation}
-def placeCard(cardNumber):
+def placeCard(cardNumber, position):
 
     # click on the card we want to use
     if cardNumber == 1:
@@ -326,6 +343,12 @@ def placeCard(cardNumber):
         pyautogui.click(thirdCardCoords[0], thirdCardCoords[1])
     elif cardNumber == 4:
         pyautogui.click(fourthCardCoords[0], fourthCardCoords[1])
+
+    # position placements, back full circle i guess lmao TODO FIX THIS PLACEMENT NOW
+    if position == "rightDef":
+        pyautogui.click(rightDefOrigin2[0] - 50, rightDefOrigin2[1])
+    elif position == "leftDef":
+        pyautogui.click(leftDefOrigin2[0] - 50, leftDefOrigin[1])
 
 
 if __name__ == "__main__":
@@ -347,6 +370,9 @@ if __name__ == "__main__":
     leftAttRef = detectEnemies(im, "reference")[1]
     rightDefRef = detectEnemies(im, "reference")[2]
     rightAttRef = detectEnemies(im, "reference")[3]
+
+    # TODO temp targeted lane (this should be dynamic in the future)
+    targetedLane = random.randint(0, 1)
 
     while True:
 
@@ -380,10 +406,13 @@ if __name__ == "__main__":
 
         time.sleep(1)
 
-# WHAT YOU SHOULD DO:
-# TODO AI check for red when holding card to know if tower is taken,
+# HIGH PRIO:
+# TODO placement points need work
+# TODO elixer detection FIX NOW
+
+# LOW PRIO:
+# TODO AI check for taken towers to advance units faster
 # TODO visualization mode for when you want to show off the AI working and another mode to toggle off the visuals for preformance (basically enables/disables image saving)
 # TODO naming convention if you can be fucked to fix it
-# TODO touch up elixer and card detection it needs it, BADLY
 # TODO its possible emotes will show up in the zones that are being monitored, look into that
 # TODO organize constants and first declares
