@@ -1,1 +1,23 @@
-{"screenOrigin": [2677, 46], "screenBotRight": [3438, 1394], "elixerTextCoords": [2899, 1345], "card1textCoords": [2911, 1311], "card2textCoords": [3055, 1310], "card3textCoords": [3197, 1311], "card4textCoords": [3341, 1310], "card1position": [2926, 1243], "card2position": [3059, 1250], "card3position": [3189, 1247], "card4position": [3349, 1249], "aboveRightTower": [3252, 764], "aboveLeftTower": [2853, 757], "leftPushed": [2854, 491], "rightPushed": [3235, 517], "emoteMenuCoords": [2748, 1168], "emoteCoords": [2880, 960]}
+{
+    "screenOrigin": [2678, 45],
+    "screenBotRight": [3439, 1390],
+    "elixerTextCoords": [2905, 1340],
+    "card1textCoords": [2914, 1311],
+    "card2textCoords": [3056, 1312],
+    "card3textCoords": [3200, 1312],
+    "card4textCoords": [3342, 1311],
+    "card1position": [2930, 1233],
+    "card2position": [3076, 1232],
+    "card3position": [3217, 1239],
+    "card4position": [3341, 1242],
+    "emoteMenuCoords": [2748, 1167],
+    "emoteCoords": [2882, 963],
+    "leftDefOrigin": [2746, 649],
+    "leftDefOrigin2": [2985, 819],
+    "rightDefOrigin": [3163, 646],
+    "rightDefOrigin2": [3376, 816],
+    "leftAttOrigin": [2741, 387],
+    "leftAttOrigin2": [2963, 589],
+    "rightAttOrigin": [3145, 386],
+    "rightAttOrigin2": [3351, 585]
+}

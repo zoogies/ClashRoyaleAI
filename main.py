@@ -1,24 +1,26 @@
 # A python program that attempts to play clash royale
 # Ryan Zmuda 2021
 
-import pyautogui
-import win32gui
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
-import keyboard
-import pytesseract as tess
-from datetime import datetime
-import re
-import time
 import json
 import random
-import numpy as np
+import re
+import time
+from datetime import datetime
+
 import cv2
+import keyboard
+import numpy as np
+import pyautogui
+import pytesseract as tess
+import win32gui
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 # for dev testing purposes
 verbose = True
 
 # defualts
 elixerStoreValue = 0
+lastElixer = 1
 
 firstCardCost = 0
 secondCardCost = 0
@@ -62,12 +64,6 @@ with open("screenPoints.json") as json_file:
         data["card4textCoords"][1] - screenOrigin[1],
     )
 
-    # place points for units
-    aboveLeftTower = tuple(data["aboveLeftTower"])
-    aboveRightTower = tuple(data["aboveRightTower"])
-    leftPushed = tuple(data["leftPushed"])
-    rightPushed = tuple(data["rightPushed"])
-
     # coords to click on cards to select them
     firstCardCoords = tuple(data["card1position"])
     secondCardCoords = tuple(data["card2position"])
@@ -77,6 +73,20 @@ with open("screenPoints.json") as json_file:
     # emote coords
     emotePosition = tuple(data["emoteCoords"])
     emoteMenuPosition = tuple(data["emoteMenuCoords"])
+
+    # lane bounds
+    leftDefOrigin = tuple(data["leftDefOrigin"])
+    leftDefOrigin2 = tuple(data["leftDefOrigin2"])
+
+    rightDefOrigin = tuple(data["rightDefOrigin"])
+    rightDefOrigin2 = tuple(data["rightDefOrigin2"])
+
+    leftAttOrigin = tuple(data["leftAttOrigin"])
+    leftAttOrigin2 = tuple(data["leftAttOrigin2"])
+
+    rightAttOrigin = tuple(data["rightAttOrigin"])
+    rightAttOrigin2 = tuple(data["rightAttOrigin2"])
+
 
 # set our constants for our crop values so we dont have to compute them every frame
 elixerCrop = (
@@ -114,10 +124,6 @@ fourthCardCrop = (
 # figure out our width and height of screen
 screenSize = (screenBotRight[0] - screenOrigin[0], screenBotRight[1] - screenOrigin[1])
 
-# scaling factor of our screen crop
-topBoundsPercent = 0.11  # TODO expose this in the json to configure
-botBoundsPercent = 0.2  # to transform these points back onto our normal playfield we just need to add these bounds back as an offset
-
 # set tesseract path
 with open("tesseractPath.txt", "r") as tessPath:
     tess.pytesseract.tesseract_cmd = tessPath.read()
@@ -148,6 +154,32 @@ bluestacksSize = im.size
 cropTL = (0, bluestacksSize[1] - screenSize[1])
 cropBR = (screenSize[0], bluestacksSize[1])
 
+# constant crops for lane images (left, top, right, bottom)
+leftDefCrop = (
+    (leftDefOrigin[0] - screenOrigin[0]),
+    (leftDefOrigin[1] - cropTL[1]),
+    (leftDefOrigin2[0] - screenOrigin[0]),
+    (leftDefOrigin2[1] - cropTL[1]),
+)
+rightDefCrop = (
+    (rightDefOrigin[0] - screenOrigin[0]),
+    (rightDefOrigin[1] - cropTL[1]),
+    (rightDefOrigin2[0] - screenOrigin[0]),
+    (rightDefOrigin2[1] - cropTL[1]),
+)
+leftAttCrop = (
+    (leftAttOrigin[0] - screenOrigin[0]),
+    (leftAttOrigin[1] - cropTL[1]),
+    (leftAttOrigin2[0] - screenOrigin[0]),
+    (leftAttOrigin2[1] - cropTL[1]),
+)
+rightAttCrop = (
+    (rightAttOrigin[0] - screenOrigin[0]),
+    (rightAttOrigin[1] - cropTL[1]),
+    (rightAttOrigin2[0] - screenOrigin[0]),
+    (rightAttOrigin2[1] - cropTL[1]),
+)
+
 
 def filterImage(img):
     # condensed filtering to grayscale binary image for easier recognition
@@ -161,10 +193,7 @@ def filterImage(img):
 
 def tessParse(im):
     # parse our text and
-    detectedText = tess.image_to_string(im, config="--psm 13")
-    # 4 is commonly mistaken for Q in the clash royale font, correct for this
-    if "q" in detectedText:
-        detectedText = "4"
+    detectedText = tess.image_to_string(im, lang="eng", config="--psm 6")
 
     detectedText = re.sub(
         "[^0-9]", "", detectedText
@@ -176,139 +205,108 @@ def tessParse(im):
 
 def parseStaticValues(
     elixerStoreValue,
-    firstCardCost,
-    secondCardCost,
-    thirdCardCost,
-    fourthCardCost,
+    lastElixer,
 ):
 
     parseValuesElapsedTime = datetime.now()
 
-    # TODO hard code this dont run computations every frame
     elixerStoreImg = im.crop((elixerCrop))
     # update current elixer store value based off playfield image
     elixerStoreImg = filterImage(elixerStoreImg)
-
+    elixerStoreImg.save("images/elixerStore.png")
     # defualt to last known value if we dont know our current
     tmp = tessParse(elixerStoreImg)
     if tmp != "":
         elixerStoreValue = tmp
+
+    if tmp == "0":
+        tmp = lastElixer
+        return tmp
+
     if verbose:
         print("elixer store value:", elixerStoreValue)
-
-    if True:  # TODO see 216
-        # update first card elixer value# TODO hard code this dont run computations every frame
-        firstCardPriceImg = im.crop((firstCardCrop))
-        firstCardPriceImg = filterImage(firstCardPriceImg)
-
-        # only update value if it isnt null
-        tmp = tessParse(firstCardPriceImg)
-        if tmp != "" and tmp != "0":
-            firstCardCost = tmp
-        if verbose:
-            print("first card price:", firstCardCost)
-
-    if True:  # TODO see 216
-        # update second card elixer value# TODO hard code this dont run computations every frame
-        secondCardPriceImg = im.crop((secondCardCrop))
-        secondCardPriceImg = filterImage(secondCardPriceImg)
-
-        # only update value if it isnt null
-        tmp = tessParse(secondCardPriceImg)
-        if tmp != "" and tmp != "0":
-            secondCardCost = tmp
-        # TODO add if verbose here or clear screen between do this for all of them
-        if verbose:
-            print("second card price:", secondCardCost)
-
-    if True:  # TODO see 216
-        # update third card elixer value# TODO hard code this dont run computations every frame
-        thirdCardPriceImg = im.crop((thirdCardCrop))
-        thirdCardPriceImg = filterImage(thirdCardPriceImg)
-
-        # only update value if it isnt null
-        tmp = tessParse(thirdCardPriceImg)
-        if tmp != "" and tmp != "0":
-            thirdCardCost = tmp
-        if verbose:
-            print("third card price:", thirdCardCost)
-
-    if (
-        True
-    ):  # TODO prob remove this, having second thoughts about backing out of detecting only when cards are used
-        # update fourth card elixer value# TODO hard code this dont run computations every frame
-        fourthCardPriceImg = im.crop((fourthCardCrop))
-        fourthCardPriceImg = filterImage(fourthCardPriceImg)
-
-        # only update value if it isnt null
-        tmp = tessParse(fourthCardPriceImg)
-        if tmp != "" and tmp != "0":
-            fourthCardCost = tmp
-        if verbose:
-            print("fourth card price:", fourthCardCost)
-    if verbose:
         print(
-            "elapsed static parse time:",
+            "elapsed elixer parse time:",
             datetime.now() - parseValuesElapsedTime,
         )
 
+    lastElixer = elixerStoreValue
+    return elixerStoreValue
 
+
+# TODO this entire function needs refactoring
 def detectEnemies(playfieldImage, query):
+    # TODO if possible should crop after converting to np but im guessing you cant
+    leftDefIm = playfieldImage.crop(leftDefCrop)
+    rightDefIm = playfieldImage.crop(rightDefCrop)
+    leftAttIm = playfieldImage.crop(leftAttCrop)
+    rightAttIm = playfieldImage.crop(rightAttCrop)
 
-    # TODO hard code this fuck i cant mentally visualize this but do it later and ref the variables in reverse of this operation
-    playfieldImage = playfieldImage.crop(
-        (
-            0,
-            screenSize[1] * topBoundsPercent,
-            screenSize[0],
-            screenSize[1] - screenSize[1] * botBoundsPercent,
-        )
-    )
-
+    # TODO WIP ok basically cut up into lanes and shit and scan them
     # Load image
-    im = cv2.cvtColor(np.array(playfieldImage), cv2.COLOR_RGB2BGR)
+    leftDefIm = cv2.cvtColor(np.array(leftDefIm), cv2.COLOR_RGB2BGR)
+    rightDefIm = cv2.cvtColor(np.array(rightDefIm), cv2.COLOR_RGB2BGR)
+    leftAttIm = cv2.cvtColor(np.array(leftAttIm), cv2.COLOR_RGB2BGR)
+    rightAttIm = cv2.cvtColor(np.array(rightAttIm), cv2.COLOR_RGB2BGR)
 
-    # Define some colours for readability - these are in OpenCV **BGR** order - reverse them for PIL
-    red = [236, 52, 52]
-    green = [0, 255, 0]
-    blue = [255, 0, 0]
+    # color defs - BGR order
     white = [255, 255, 255]
     black = [0, 0, 0]
 
-    # Make all red pixels white AND at same time everything else black
-    im = np.where(np.all(im == white, axis=-1, keepdims=True), white, black)
+    leftDefIm = np.where(
+        np.all(leftDefIm == white, axis=-1, keepdims=True), white, black
+    )
+    rightDefIm = np.where(
+        np.all(rightDefIm == white, axis=-1, keepdims=True), white, black
+    )
+    leftAttIm = np.where(
+        np.all(leftAttIm == white, axis=-1, keepdims=True), white, black
+    )
+    rightAttIm = np.where(
+        np.all(rightAttIm == white, axis=-1, keepdims=True), white, black
+    )
+
     if query == "reference":
-        cv2.imwrite("images/enemyDetectRef.png", im)
-        return im
+        # write all of our images (this is so inefficient lmao) TODO remove when not visualizing?
+        cv2.imwrite("images/leftDefRef.png", leftDefIm)
+        cv2.imwrite("images/leftAttRef.png", leftAttIm)
+        cv2.imwrite("images/rightDefRef.png", rightDefIm)
+        cv2.imwrite("images/rightAttRef.png", rightAttIm)
+        return leftDefIm, leftAttIm, rightDefIm, rightAttIm
     else:
-        cv2.imwrite(
-            "images/enemyDetect.png", cv2.absdiff(refIm, im)
-        )  # diff between two images TODO remove when not visualizing
+        # get the pixel differences between our two images for each lane attack def bound
+        cv2.imwrite("images/leftDef.png", cv2.absdiff(leftDefRef, leftDefIm))
+        cv2.imwrite("images/leftAtt.png", cv2.absdiff(leftAttRef, leftAttIm))
+        cv2.imwrite("images/rightDef.png", cv2.absdiff(rightDefRef, rightDefIm))
+        cv2.imwrite("images/rightAtt.png", cv2.absdiff(rightAttRef, rightAttIm))
 
 
-# TODO pair this down to only parsing move the cluster alg to another function or merge with detect
-def parseEnemies(topBoundsPercent, botBoundsPercent):
+# TODO WIP ok this part takes the data from detect enemies and makes the best decision, see notebook for logic
+def parseEnemies():
     startTime = datetime.now()
 
-    playfieldImage = cv2.imread("images/enemyDetect.png")
-    variableName = np.argwhere(playfieldImage == 255)  # get all white pixels
-    if int(len(variableName) / 2) != 0:
-        middlePixel = variableName[
-            int(
-                len(variableName) / 2
-            )  # TODO replace this with the lowest white pixel on the screen
-        ].tolist()  # get the middle most white pixel (TODO is this actually gonna work lmao?)
+    # lmao this is so inefficient TODO fix this shit
+    leftAtt = cv2.imread("images/leftAtt.png")
+    leftDef = cv2.imread("images/leftDef.png")
+    rightAtt = cv2.imread("images/rightAtt.png")
+    rightDef = cv2.imread("images/rightDef.png")
 
-        middlePixel = (
-            middlePixel[0]
-            + ((screenSize[0] * topBoundsPercent) + (screenSize[1] * botBoundsPercent))
-            + screenOrigin[0],
-            middlePixel[1] + screenOrigin[1],
-        )
-        print("moving to:", middlePixel)
-        pyautogui.moveTo(middlePixel)
+    # another block of pepega copy paste
+    leftAtt = np.argwhere(leftAtt == 255)
+    leftDef = np.argwhere(leftDef == 255)
+    rightAtt = np.argwhere(rightAtt == 255)
+    rightDef = np.argwhere(rightDef == 255)
+
     if verbose:
-        print("elapsed cluster:", datetime.now() - startTime)
+        print("left att", len(leftAtt))
+        print("left def", len(leftDef))
+        print("right att", len(rightAtt))
+        print("right def", len(rightDef))
+
+    # TODO logic for deciding our course of action
+
+    if verbose:
+        print("elapsed enemy parse:", datetime.now() - startTime)
 
 
 def emote():
@@ -317,57 +315,17 @@ def emote():
 
 
 # starting this index from 1 because its possibly faster (yes i know, barely if at all) {clarification: because it removes an addition operation}
-def placeCard(location, cardIndex):
+def placeCard(cardNumber):
 
     # click on the card we want to use
-    if cardIndex == 1:
+    if cardNumber == 1:
         pyautogui.click(firstCardCoords[0], firstCardCoords[1])
-    elif cardIndex == 2:
+    elif cardNumber == 2:
         pyautogui.click(secondCardCoords[0], secondCardCoords[1])
-    elif cardIndex == 3:
+    elif cardNumber == 3:
         pyautogui.click(thirdCardCoords[0], thirdCardCoords[1])
-    elif cardIndex == 4:
+    elif cardNumber == 4:
         pyautogui.click(fourthCardCoords[0], fourthCardCoords[1])
-
-    # place the card in our desired location
-    if location == "leftAboveTower":
-        pyautogui.click(aboveLeftTower[0], aboveLeftTower[1])
-    elif location == "rightAboveTower":
-        pyautogui.click(aboveRightTower[0], aboveRightTower[1])
-    elif location == "leftPushedTower":
-        # TODO
-        return
-    elif location == "rightPushedTower":
-        # TODO
-        return
-    elif location == "defendLeftCastle":
-        # TODO
-        return
-    elif location == "defendRightCastle":
-        # TODO
-        return
-
-
-# BASIC STATEGIES
-
-# pick the cheapest presented card at all times and place it
-def placeCheapestCard():
-    possibleCards = [
-        int(firstCardCost),
-        int(secondCardCost),
-        int(thirdCardCost),
-        int(fourthCardCost),
-    ]
-    # get index of smallest item in list
-    if min(possibleCards) != 0:
-        cardNumber = (
-            possibleCards.index(min(possibleCards)) + 1
-        )  # add one because lists start at 0
-
-        placeCard("leftAboveTower", cardNumber)
-    else:
-        cardNumber = random.randint(1, 4)
-        placeCard("leftAboveTower", cardNumber)
 
 
 if __name__ == "__main__":
@@ -384,11 +342,15 @@ if __name__ == "__main__":
             cropBR[1],
         )
     )
-    refIm = detectEnemies(im, "reference")
+    # get our reference images one time
+    leftDefRef = detectEnemies(im, "reference")[0]
+    leftAttRef = detectEnemies(im, "reference")[1]
+    rightDefRef = detectEnemies(im, "reference")[2]
+    rightAttRef = detectEnemies(im, "reference")[3]
 
     while True:
-        # get a screenshot of the playfield
 
+        # get a screenshot of the playfield
         im = screenshot("BlueStacks")
         # crop by our playfield bounds in relation to the bluestacks window
         im = im.crop(
@@ -400,33 +362,28 @@ if __name__ == "__main__":
             )
         )
 
-        # parse playfield for elixer store and our four card prices
+        # parse playfield for elixer store
+        elixerStoreValue = parseStaticValues(elixerStoreValue, lastElixer)
 
-        parseStaticValues(
-            elixerStoreValue,
-            firstCardCost,
-            secondCardCost,
-            thirdCardCost,
-            fourthCardCost,
-        )
+        # check lanes for enemies
+        detectEnemies(im, "normal")
 
-        detectEnemies(im, "i might be retarded possibly")
-        # emote()
-        parseEnemies(topBoundsPercent, botBoundsPercent)
+        # use logic to determine threats and placement
+        parseEnemies()
 
-        # time.sleep(1)
+        # emote() TODO incorporate emotes into some fashion
 
         # emergency abort
         if keyboard.is_pressed("q"):
             print("-> EMERGENCY EXIT")
             exit()
 
+        time.sleep(1)
+
 # WHAT YOU SHOULD DO:
-# write more attack patterns for fun
-# start countering enemies (detect via clusters or something maybe)
 # TODO AI check for red when holding card to know if tower is taken,
-# TODO make it spam emotes would be a funny moment in the video
-# https://stackoverflow.com/questions/60018903/how-to-replace-all-pixels-of-a-certain-rgb-value-with-another-rgb-value-in-openc todo look at this instead of PIL for cleaning elixer text
 # TODO visualization mode for when you want to show off the AI working and another mode to toggle off the visuals for preformance (basically enables/disables image saving)
 # TODO naming convention if you can be fucked to fix it
-# TODO touch up elixer and card detection it needs it, badly
+# TODO touch up elixer and card detection it needs it, BADLY
+# TODO its possible emotes will show up in the zones that are being monitored, look into that
+# TODO organize constants and first declares
