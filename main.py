@@ -16,16 +16,15 @@ import win32gui
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 # for dev testing purposes
-verbose = True
+# probably just disable these later
+verboseEnemyParse = False
+verboseElixerParse = False
+verboseDefStats = False
+logicStateVerbose = True
 
 # defualts
 elixerStoreValue = 0
 lastElixer = 1
-
-firstCardCost = 0
-secondCardCost = 0
-thirdCardCost = 0
-fourthCardCost = 0
 
 # raidus of pixels to encompass text in recognition
 elixerStoreScanRadius = 25
@@ -44,24 +43,6 @@ with open("screenPoints.json") as json_file:
     elixerStoreTextPos = (
         data["elixerTextCoords"][0] - screenOrigin[0],
         data["elixerTextCoords"][1] - screenOrigin[1],
-    )
-
-    # card price text position
-    card1textCoords = (
-        data["card1textCoords"][0] - screenOrigin[0],
-        data["card1textCoords"][1] - screenOrigin[1],
-    )
-    card2textCoords = (
-        data["card2textCoords"][0] - screenOrigin[0],
-        data["card2textCoords"][1] - screenOrigin[1],
-    )
-    card3textCoords = (
-        data["card3textCoords"][0] - screenOrigin[0],
-        data["card3textCoords"][1] - screenOrigin[1],
-    )
-    card4textCoords = (
-        data["card4textCoords"][0] - screenOrigin[0],
-        data["card4textCoords"][1] - screenOrigin[1],
     )
 
     # coords to click on cards to select them
@@ -94,31 +75,6 @@ elixerCrop = (
     (elixerStoreTextPos[1] - elixerStoreScanRadius),
     (elixerStoreTextPos[0] + elixerStoreScanRadius),
     (elixerStoreTextPos[1] + elixerStoreScanRadius),
-)
-
-firstCardCrop = (
-    (card1textCoords[0] - cardScanRadius),
-    (card1textCoords[1] - cardScanRadius),
-    (card1textCoords[0] + cardScanRadius),
-    (card1textCoords[1] + cardScanRadius),
-)
-secondCardCrop = (
-    (card2textCoords[0] - cardScanRadius),
-    (card2textCoords[1] - cardScanRadius),
-    (card2textCoords[0] + cardScanRadius),
-    (card2textCoords[1] + cardScanRadius),
-)
-thirdCardCrop = (
-    (card3textCoords[0] - cardScanRadius),
-    (card3textCoords[1] - cardScanRadius),
-    (card3textCoords[0] + cardScanRadius),
-    (card3textCoords[1] + cardScanRadius),
-)
-fourthCardCrop = (
-    (card4textCoords[0] - cardScanRadius),
-    (card4textCoords[1] - cardScanRadius),
-    (card4textCoords[0] + cardScanRadius),
-    (card4textCoords[1] + cardScanRadius),
 )
 
 # figure out our width and height of screen
@@ -223,7 +179,7 @@ def parseStaticValues(
         tmp = lastElixer
         return tmp
 
-    if verbose:
+    if verboseElixerParse:
         print("elixer store value:", elixerStoreValue)
         print(
             "elapsed elixer parse time:",
@@ -297,7 +253,7 @@ def parseEnemies():
     rightAtt = np.argwhere(rightAtt == 255)
     rightDef = np.argwhere(rightDef == 255)
 
-    if verbose:
+    if verboseDefStats:
         print("left att", len(leftAtt))
         print("left def", len(leftDef))
         print("right att", len(rightAtt))
@@ -309,20 +265,31 @@ def parseEnemies():
     rightDef = len(rightDef)
 
     # TODO this logic could always be done better
-    if int(elixerStoreValue) > 4:
+    if int(elixerStoreValue) >= 4:
         cardToPlace = random.randint(1, 4)
-        if not leftDef + leftAtt + rightAtt + rightDef <= 0:  # if there are enemies
-            if leftDef + leftAtt >= rightAtt + leftDef:  # if more enemies left
-                placeCard(cardToPlace, "leftDef")  # place units left
-            else:  # else more units are right
-                placeCard(cardToPlace, "rightDef")  # place units right
-        else:  # else there are enemies already
-            if targetedLane == 0:  # if the AI is targeting lane 0
-                placeCard(cardToPlace, "leftDef")  # place a unit in lane 0 home
+        if leftDef + leftAtt + rightAtt + rightDef >= 0:  # if there are enemies
+            if (
+                leftDef >= rightDef and leftDef + rightDef > leftAtt + rightAtt
+            ):  # if more enemies are pushed up to defense on left and more enemies are attacking
+                placeCard(cardToPlace, "leftDef")  # place units left def
+            elif (
+                rightDef >= leftDef and leftDef + rightDef > leftAtt + rightAtt
+            ):  # more enemies right defense
+                placeCard(cardToPlace, "rightDef")  # place units right def
+            else:
+                if (
+                    True
+                ):  # if the AI is targeting lane 0 TODO this is random to test shit
+                    placeCard(cardToPlace, "leftAtt")  # place a unit in lane 0 home
+                else:  # else AI is targeting lane 1
+                    placeCard(cardToPlace, "rightAtt")  # place a unit in lane 1 home
+        else:  # else there are no enemies
+            if True:  # if the AI is targeting lane 0 TODO this is random to test shit
+                placeCard(cardToPlace, "leftAtt")  # place a unit in lane 0 home
             else:  # else AI is targeting lane 1
-                placeCard(cardToPlace, "rightDef")  # place a unit in lane 1 home
+                placeCard(cardToPlace, "rightAtt")  # place a unit in lane 1 home
 
-    if verbose:
+    if verboseEnemyParse:
         print("elapsed enemy parse:", datetime.now() - startTime)
 
 
@@ -333,7 +300,7 @@ def emote():
 
 # starting this index from 1 because its possibly faster (yes i know, barely if at all) {clarification: because it removes an addition operation}
 def placeCard(cardNumber, position):
-
+    elixerStoreValue = "1"
     # click on the card we want to use
     if cardNumber == 1:
         pyautogui.click(firstCardCoords[0], firstCardCoords[1])
@@ -344,11 +311,42 @@ def placeCard(cardNumber, position):
     elif cardNumber == 4:
         pyautogui.click(fourthCardCoords[0], fourthCardCoords[1])
 
-    # position placements, back full circle i guess lmao TODO FIX THIS PLACEMENT NOW
+    # TODO why is this being declared every game loop, stupid ass
+    defYOff = 1.5
+    defXOff = 2
+    attYOff = 2.5
+    attXOff = 2
+
+    # position placements, back full circle i guess lmao
+    # TODO this should not be hardcoded, dumbass
     if position == "rightDef":
-        pyautogui.click(rightDefOrigin2[0] - 50, rightDefOrigin2[1])
+        if logicStateVerbose:
+            print("DEBUG defending right")
+        pyautogui.click(
+            ((rightDefOrigin2[0] - rightDefOrigin[0]) / defXOff) + rightDefOrigin[0],
+            ((rightDefOrigin2[1] - rightDefOrigin[1]) / defYOff) + rightDefOrigin[1],
+        )
     elif position == "leftDef":
-        pyautogui.click(leftDefOrigin2[0] - 50, leftDefOrigin[1])
+        if logicStateVerbose:
+            print("DEBUG defending left")
+        pyautogui.click(
+            ((leftDefOrigin2[0] - leftDefOrigin[0]) / defXOff) + leftDefOrigin[0],
+            ((leftDefOrigin2[1] - leftDefOrigin[1]) / defYOff) + leftDefOrigin[1],
+        )
+    elif position == "rightAtt":
+        if logicStateVerbose:
+            print("DEBUG attacking right")
+        pyautogui.click(
+            ((rightAttOrigin2[0] - rightAttOrigin[0]) / attXOff) + rightAttOrigin[0],
+            ((rightAttOrigin2[1] - rightAttOrigin[1]) / attYOff) + rightAttOrigin[1],
+        )
+    elif position == "leftAtt":
+        if logicStateVerbose:
+            print("DEBUG attacking left")
+        pyautogui.click(
+            ((leftAttOrigin2[0] - leftAttOrigin[0]) / attXOff) + leftAttOrigin[0],
+            ((leftAttOrigin2[1] - leftAttOrigin[1]) / attYOff) + leftAttOrigin[1],
+        )
 
 
 if __name__ == "__main__":
@@ -373,6 +371,8 @@ if __name__ == "__main__":
 
     # TODO temp targeted lane (this should be dynamic in the future)
     targetedLane = random.randint(0, 1)
+    if logicStateVerbose:
+        print("DEBUG Targeting lane", targetedLane)
 
     while True:
 
@@ -397,14 +397,12 @@ if __name__ == "__main__":
         # use logic to determine threats and placement
         parseEnemies()
 
-        # emote() TODO incorporate emotes into some fashion
+        # emote() #TODO incorporate emotes into some fashion
 
         # emergency abort
         if keyboard.is_pressed("q"):
             print("-> EMERGENCY EXIT")
             exit()
-
-        time.sleep(1)
 
 # HIGH PRIO:
 # TODO placement points need work
@@ -417,3 +415,4 @@ if __name__ == "__main__":
 # TODO its possible emotes will show up in the zones that are being monitored, look into that
 # TODO organize constants and first declares
 # TODO python asynch announce its decisions
+# TODO honestly this whole thing should be in a class to use self variable what are you doing dumbass

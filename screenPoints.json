@@ -12,12 +12,12 @@
     "card4position": [3341, 1242],
     "emoteMenuCoords": [2748, 1167],
     "emoteCoords": [2882, 963],
-    "leftDefOrigin": [2731, 592],
-    "leftDefOrigin2": [3011, 1073],
-    "rightDefOrigin": [3099, 646],
-    "rightDefOrigin2": [3386, 1056],
-    "leftAttOrigin": [2736, 386],
-    "leftAttOrigin2": [2950, 651],
-    "rightAttOrigin": [3167, 386],
-    "rightAttOrigin2": [3377, 672]
+    "leftDefOrigin": [2738, 592],
+    "leftDefOrigin2": [2986, 963],
+    "rightDefOrigin": [3127, 563],
+    "rightDefOrigin2": [3376, 1021],
+    "leftAttOrigin": [2735, 380],
+    "leftAttOrigin2": [2950, 586],
+    "rightAttOrigin": [3129, 385],
+    "rightAttOrigin2": [3342, 586]
 }
