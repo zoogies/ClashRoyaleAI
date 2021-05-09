@@ -43,6 +43,7 @@ Using the data from these locations it will decide the best course of action in 
 
 The model for the AI decision making is as follows:
 
-TODO PUT THIS IMAGE HERE
+![Flowchart (1)](https://user-images.githubusercontent.com/43967290/117589182-1672d580-b0f6-11eb-8b30-dbdda4e958d8.png)
+
 
 **Clash Royale AI: Ryan Zmuda 2021**
