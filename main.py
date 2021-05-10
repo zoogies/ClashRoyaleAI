@@ -397,7 +397,7 @@ if __name__ == "__main__":
         # use logic to determine threats and placement
         parseEnemies()
 
-        # emote() #TODO incorporate emotes into some fashion
+        # emote()  # TODO incorporate emotes into some fashion
 
         # emergency abort
         if keyboard.is_pressed("q"):
